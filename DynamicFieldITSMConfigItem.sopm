@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<otrs_package version="1.1">
+    <Name>DynamicFieldITSMConfigItem</Name>
+    <Version>5.0.6</Version>
+    <Vendor>c.a.p.e. IT GmbH</Vendor>
+    <URL>http://www.cape-it.de/</URL>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Version="5.0.6" Date="2016-12-20 13:54:06">Bugfix: T2016122090002543 (Undefined subroutine in DynamicFieldITSMConfigItemAJAXHandler).</ChangeLog>
+    <ChangeLog Version="5.0.5" Date="2016-12-06 13:12:58">Bugfix: T2016113090000671 (no results without constrictions in search), T2016100690000825 (added check of ITSMConfigItemClasses), T2016080390000871 (merged changes from DFRemoteDB).</ChangeLog>
+    <ChangeLog Version="5.0.4" Date="2016-09-05 16:08:59">CR: (added selections for stats module); Bugfix: T2016082190000444 (changed layout of field to match conditions of KIX4OTRS), T2016072690000857 (failed to add value by script).</ChangeLog>
+    <ChangeLog Version="5.0.3" Date="2016-06-30 15:46:57">Bugfix: T2016063090000798 (edit field does not handle removed values correctly), T2016063090000798 (internal server error if constricted array value gets removed), T2016062990000693 (unescaped left brace in regexp is deprecated), T2016062890000766 (unnecessary ajax request triggered), T2016061390000721 (invalid argument type in push on migration), T2016053090000807 (MaxQueryResult is not used by ajaxhandler).</ChangeLog>
+    <ChangeLog Version="5.0.2" Date="2016-04-22 11:37:42">Bugfix: T2016022590000724 (can not use ticket template with mandatory field), (fixed undefined value as an ARRAY reference).</ChangeLog>
+    <ChangeLog Version="5.0.1" Date="2016-02-29 16:19:01">Bugfix: (mandatory fields were not marked correctly), (async ajax calls caused problems with running conditions).</ChangeLog>
+    <ChangeLog Version="5.0.0" Date="2016-01-29 16:29:19">Bugfix: T2016011890001221 (jobs of generic agents have to be checked on upgrade), T2016011890001221 (correct bind for autocomplete search in AdminGenericAgent).</ChangeLog>
+    <ChangeLog Version="4.99.81" Date="2016-01-08 08:13:45">CR: T2015082690000606 (Added trigger for removed values), T2015082690000606 (Updated descriptions and translations); Bugfix: T2015082690000606 (Minor bugfixes).</ChangeLog>
+    <ChangeLog Version="4.99.80" Date="2015-12-31 21:03:22">CR: T2015082690000606 (reworked layout and handling), T2015082690000606 (changes for use with 5.0.x).</ChangeLog>
+    <Description Lang="en">DynamicField backend to provide access to OTRS CMDB</Description>
+    <Description Lang="de">DynamicField-Backend zur Bereitstellung des Zugangs zur OTRS-CMDB</Description>
+    <Framework>5.0.x</Framework>
+    <IntroInstall Lang="en" Title="Install Information" Type="pre">
+        
+            &lt;br/&gt;
+            WELCOME&lt;br/&gt;
+        &lt;br/&gt;
+            You are about to install DynamicFieldITSMConfigItem for OTRS 5.0.x .&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;strong&gt;Required Packages:&lt;/strong&gt;
+        &lt;br/&gt;
+        &lt;ul&gt;
+            &lt;li&gt;ITSMConfigurationManagement 5.0.1&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+            c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroInstall>
+    <IntroInstall Lang="en" Title="Install Information" Type="post">
+        
+            &lt;br/&gt;
+            The package has been installed.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;strong&gt;Important Advice:&lt;/strong&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+            It is recommended to delete the OTRS-cache and perform a configuration rebuild before you continue the use of this OTRS installation.
+            &lt;br/&gt;
+        &lt;br/&gt;
+            To link tickets with relevant config items during DynamicFieldUpdate activate the event Ticket::EventModulePost###ITSMConfigItemLinkAdd.
+            &lt;br/&gt;
+        &lt;br/&gt;
+            c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroInstall>
+    <IntroUninstall Lang="en" Title="Uninstall Information" Type="pre">
+        
+        &lt;br/&gt;
+        WELCOME&lt;br/&gt;
+        &lt;br/&gt;
+        You are about to UNINSTALL DynamicFieldITSMConfigItem for OTRS.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;strong&gt;Important Advice:&lt;/strong&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        All dynamic fields of type ITSMConfigItem will be removed with all related ticket values. Links from tickets to config items will NOT be removed.
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroUninstall>
+    <IntroUninstall Lang="en" Title="Uninstall Information" Type="post">
+        
+            &lt;br/&gt;
+            The package has been uninstalled.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+            c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroUninstall>
+    <IntroUpgrade Lang="en" Title="Upgrade Information" Type="pre">
+        
+            &lt;br/&gt;
+            WELCOME&lt;br/&gt;
+        &lt;br/&gt;
+            You are about to upgrade DynamicFieldITSMConfigItem for OTRS.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+            c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroUpgrade>
+    <IntroUpgrade Lang="en" Title="Upgrade Information" Type="post">
+        
+            &lt;br/&gt;
+            The package has been upgraded.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;strong&gt;Important Advice:&lt;/strong&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+            It is recommended to delete the OTRS-cache and perform a configuration rebuild before you continue the use of this OTRS installation.
+            &lt;br/&gt;
+        &lt;br/&gt;
+            To link tickets with relevant config items during DynamicFieldUpdate activate the event Ticket::EventModulePost###ITSMConfigItemLinkAdd.
+            &lt;br/&gt;
+        &lt;br/&gt;            
+            c.a.p.e. IT ...easy.&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        
+    </IntroUpgrade>
+    <PackageRequired Version="5.0.1">ITSMConfigurationManagement</PackageRequired>
+    <CodeInstall Type="post">
+    $Kernel::OM-&gt;Get('var::packagesetup::DynamicFieldITSMConfigItem')-&gt;CodeInstall();
+    </CodeInstall>
+    <CodeUpgrade Type="post">
+    $Kernel::OM-&gt;Get('var::packagesetup::DynamicFieldITSMConfigItem')-&gt;CodeUpgrade();
+    </CodeUpgrade>
+    <CodeUpgrade Version="4.99.80" Type="post">
+    $Kernel::OM-&gt;Get('var::packagesetup::DynamicFieldITSMConfigItem')-&gt;CodeUpgrade_5();
+    </CodeUpgrade>
+    <CodeUninstall Type="pre">
+    $Kernel::OM-&gt;Get('var::packagesetup::DynamicFieldITSMConfigItem')-&gt;CodeUninstall();
+    </CodeUninstall>
+    <CodeReinstall Type="post">
+    $Kernel::OM-&gt;Get('var::packagesetup::DynamicFieldITSMConfigItem')-&gt;CodeReinstall();
+    </CodeReinstall>
+    
+    
+    <Filelist>
+        <File Location="Kernel/Config/Files/DynamicFieldITSMConfigItem.xml" Permission="644"/>
+        <File Location="Kernel/Language/de_DynamicFieldITSMConfigItem.pm" Permission="644"/>
+        <File Location="Kernel/Modules/AdminDynamicFieldITSMConfigItem.pm" Permission="644"/>
+        <File Location="Kernel/Modules/DynamicFieldITSMConfigItemAJAXHandler.pm" Permission="644"/>
+        <File Location="Kernel/Output/HTML/Templates/Standard/AdminDynamicFieldITSMConfigItem.tt" Permission="644"/>
+        <File Location="Kernel/System/DynamicField/Driver/ITSMConfigItemReference.pm" Permission="644"/>
+        <File Location="Kernel/System/Ticket/Event/ITSMConfigItemLinkAdd.pm" Permission="644"/>
+        <File Location="doc/CHANGES_DynamicFieldITSMConfigItem.md" Permission="644"/>
+        <File Location="doc/en/DynamicFieldITSMConfigItem.pdf" Permission="644"/>
+        <File Location="var/packagesetup/DynamicFieldITSMConfigItem.pm" Permission="644"/>
+    </Filelist>
+    <DatabaseInstall>
+    </DatabaseInstall>
+    <DatabaseUpgrade>
+    </DatabaseUpgrade>
+    <DatabaseReinstall>
+    </DatabaseReinstall>
+    <DatabaseUninstall>
+    </DatabaseUninstall>
+</otrs_package>
