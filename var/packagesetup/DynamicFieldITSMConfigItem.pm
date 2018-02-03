@@ -69,26 +69,6 @@ sub new {
     $Self->{ReverseValidList} = \%TmpHash2;
     $Self->{ValidList}        = \%Validlist;
 
-    # create needed sysconfig object...
-    $Self->{SysConfigObject} = $Kernel::OM->Get('Kernel::System::SysConfig');
-    $Self->{SysConfigObject}->WriteDefault();
-    my @ZZZFiles = (
-        'ZZZAAuto.pm',
-        'ZZZAuto.pm',
-    );
-
-    # reload the ZZZ files (mod_perl workaround)
-    for my $ZZZFile (@ZZZFiles) {
-        PREFIX:
-        for my $Prefix (@INC) {
-            my $File = $Prefix . '/Kernel/Config/Files/' . $ZZZFile;
-            if ( !-f $File ) {
-                next PREFIX
-            }
-            do $File;
-            last PREFIX;
-        }
-    }
     return $Self;
 }
 

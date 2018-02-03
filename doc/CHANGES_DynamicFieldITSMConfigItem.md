@@ -2,7 +2,8 @@
 * Copyright (C) 2006-2016 c.a.p.e. IT GmbH, http://www.cape-it.de/
 * $Id: CHANGES_DynamicFieldITSMConfigItem.md,v 1.67 2016/12/20 12:48:19 tto Exp $
 
-# r5.0.7 (2017/0?/??)
+# 6.0.0 (2018/02/02)
+* port module to OTRS6
 
 # r5.0.6 (2017/12/20)
 * (2016/12/20) - Bugfix: T2016122090002543 (Undefined subroutine in DynamicFieldITSMConfigItemAJAXHandler) (tto)

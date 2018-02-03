@@ -1,6 +1,7 @@
 # --
 # Kernel/Modules/AdminDynamicFieldITSMConfigItem.pm - provides a dynamic fields config view for admins
 # Copyright (C) 2006-2016 c.a.p.e. IT GmbH, http://www.cape-it.de
+# Maintenance 2018 - Perl-Services.de, http://perl-services.de
 #
 # written/edited by:
 # * Mario(dot)Illinger(at)cape(dash)it(dot)de
@@ -39,27 +40,19 @@ sub new {
     bless( $Self, $Type );
 
     # create additional objects
-    $Self->{ConfigObject}            = $Kernel::OM->Get('Kernel::Config');
-    $Self->{LayoutObject}            = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-    $Self->{DynamicFieldObject}      = $Kernel::OM->Get('Kernel::System::DynamicField');
-    $Self->{EncodeObject}            = $Kernel::OM->Get('Kernel::System::Encode');
-    $Self->{GeneralCatalogObject}    = $Kernel::OM->Get('Kernel::System::GeneralCatalog');
-    $Self->{ITSMConfigItemObject}    = $Kernel::OM->Get('Kernel::System::ITSMConfigItem');
-    $Self->{TemplateGeneratorObject} = $Kernel::OM->Get('Kernel::System::TemplateGenerator');
-    $Self->{ValidObject}             = $Kernel::OM->Get('Kernel::System::Valid');
-    $Self->{ParamObject}             = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # get configured object types
-    $Self->{ObjectTypeConfig} = $Self->{ConfigObject}->Get('DynamicFields::ObjectType');
-
-    # get the fields config
-    $Self->{FieldTypeConfig} = $Self->{ConfigObject}->Get('DynamicFields::Driver') || {};
+    $Self->{ObjectTypeConfig} = $ConfigObject->Get('DynamicFields::ObjectType');
+    $Self->{FieldTypeConfig} = $ConfigObject->Get('DynamicFields::Driver') || {};
 
     return $Self;
 }
 
 sub Run {
     my ( $Self, %Param ) = @_;
+
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     if ( $Self->{Subaction} eq 'Add' ) {
         return $Self->_Add(
@@ -69,7 +62,7 @@ sub Run {
     elsif ( $Self->{Subaction} eq 'AddAction' ) {
 
         # challenge token check for write action
-        $Self->{LayoutObject}->ChallengeTokenCheck();
+        $LayoutObject->ChallengeTokenCheck();
 
         return $Self->_AddAction(
             %Param,
@@ -83,7 +76,7 @@ sub Run {
     elsif ( $Self->{Subaction} eq 'ChangeAction' ) {
 
         # challenge token check for write action
-        $Self->{LayoutObject}->ChallengeTokenCheck();
+        $LayoutObject->ChallengeTokenCheck();
 
         return $Self->_ChangeAction(
             %Param,
@@ -96,7 +89,7 @@ sub Run {
         );
     }
 
-    return $Self->{LayoutObject}->ErrorScreen(
+    return $LayoutObject->ErrorScreen(
         Message => "Undefined subaction.",
     );
 }
@@ -104,11 +97,15 @@ sub Run {
 sub _Add {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
     my %GetParam;
     for my $Needed (qw(ObjectType FieldType FieldOrder)) {
-        $GetParam{$Needed} = $Self->{ParamObject}->GetParam( Param => $Needed );
+        $GetParam{$Needed} = $ParamObject->GetParam( Param => $Needed );
+
         if ( !$Needed ) {
-            return $Self->{LayoutObject}->ErrorScreen(
+            return $LayoutObject->ErrorScreen(
                 Message => "Need $Needed",
             );
         }
@@ -130,11 +127,16 @@ sub _Add {
 sub _AddAction {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject        = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject       = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
+
     my %Errors;
     my %GetParam;
 
     for my $Needed (qw(Name Label FieldOrder)) {
-        $GetParam{$Needed} = $Self->{ParamObject}->GetParam( Param => $Needed );
+        $GetParam{$Needed} = $ParamObject->GetParam( Param => $Needed );
+
         if ( !$GetParam{$Needed} ) {
             $Errors{ $Needed . 'ServerError' }        = 'ServerError';
             $Errors{ $Needed . 'ServerErrorMessage' } = 'This field is required.';
@@ -153,7 +155,7 @@ sub _AddAction {
         }
 
         # get dynamic field list
-        my $DynamicFieldsList = $Self->{DynamicFieldObject}->DynamicFieldList(
+        my $DynamicFieldsList = $DynamicFieldObject->DynamicFieldList(
             Valid      => 0,
             ResultType => 'HASH',
         ) || {};
@@ -189,7 +191,7 @@ sub _AddAction {
             MinQueryLength QueryDelay MaxQueryResult
         )
     ) {
-        $GetParam{$ConfigParam} = $Self->{ParamObject}->GetParam( Param => $ConfigParam );
+        $GetParam{$ConfigParam} = $ParamObject->GetParam( Param => $ConfigParam );
     }
 
     # get 'raw' configuration params
@@ -198,7 +200,7 @@ sub _AddAction {
             ItemSeparator
         )
     ) {
-        $GetParam{$ConfigParam} = $Self->{ParamObject}->GetParam( Param => $ConfigParam, Raw => 1, );
+        $GetParam{$ConfigParam} = $ParamObject->GetParam( Param => $ConfigParam, Raw => 1, );
     }
 
     # get 'array' configuration params
@@ -207,13 +209,13 @@ sub _AddAction {
             ITSMConfigItemClasses DeploymentStates DefaultValues
         )
     ) {
-        my @Data = $Self->{ParamObject}->GetArray( Param => $ConfigParam );
+        my @Data = $ParamObject->GetArray( Param => $ConfigParam );
         $GetParam{$ConfigParam} = \@Data;
     }
 
     # uncorrectable errors
     if ( !$GetParam{ValidID} ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Need ValidID",
         );
     }
@@ -235,7 +237,7 @@ sub _AddAction {
     };
 
     # create a new field
-    my $FieldID = $Self->{DynamicFieldObject}->DynamicFieldAdd(
+    my $FieldID = $DynamicFieldObject->DynamicFieldAdd(
         Name       => $GetParam{Name},
         Label      => $GetParam{Label},
         FieldOrder => $GetParam{FieldOrder},
@@ -247,12 +249,12 @@ sub _AddAction {
     );
 
     if ( !$FieldID ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Could not create the new field",
         );
     }
 
-    return $Self->{LayoutObject}->Redirect(
+    return $LayoutObject->Redirect(
         OP => "Action=AdminDynamicField",
     );
 }
@@ -260,11 +262,15 @@ sub _AddAction {
 sub _Change {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject        = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject       = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
+
     my %GetParam;
     for my $Needed (qw(ObjectType FieldType)) {
-        $GetParam{$Needed} = $Self->{ParamObject}->GetParam( Param => $Needed );
+        $GetParam{$Needed} = $ParamObject->GetParam( Param => $Needed );
         if ( !$Needed ) {
-            return $Self->{LayoutObject}->ErrorScreen(
+            return $LayoutObject->ErrorScreen(
                 Message => "Need $Needed",
             );
         }
@@ -274,22 +280,22 @@ sub _Change {
     my $ObjectTypeName = $Self->{ObjectTypeConfig}->{ $GetParam{ObjectType} }->{DisplayName} || '';
     my $FieldTypeName  = $Self->{FieldTypeConfig}->{ $GetParam{FieldType} }->{DisplayName}   || '';
 
-    my $FieldID = $Self->{ParamObject}->GetParam( Param => 'ID' );
+    my $FieldID = $ParamObject->GetParam( Param => 'ID' );
 
     if ( !$FieldID ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Need ID",
         );
     }
 
     # get dynamic field data
-    my $DynamicFieldData = $Self->{DynamicFieldObject}->DynamicFieldGet(
+    my $DynamicFieldData = $DynamicFieldObject->DynamicFieldGet(
         ID => $FieldID,
     );
 
     # check for valid dynamic field configuration
     if ( !IsHashRefWithData($DynamicFieldData) ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Could not get data for dynamic field $FieldID",
         );
     }
@@ -308,32 +314,36 @@ sub _Change {
 sub _ChangeAction {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject        = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject       = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
+
     my %Errors;
     my %GetParam;
 
     for my $Needed (qw(Name Label FieldOrder)) {
-        $GetParam{$Needed} = $Self->{ParamObject}->GetParam( Param => $Needed );
+        $GetParam{$Needed} = $ParamObject->GetParam( Param => $Needed );
         if ( !$GetParam{$Needed} ) {
             $Errors{ $Needed . 'ServerError' }        = 'ServerError';
             $Errors{ $Needed . 'ServerErrorMessage' } = 'This field is required.';
         }
     }
 
-    my $FieldID = $Self->{ParamObject}->GetParam( Param => 'ID' );
+    my $FieldID = $ParamObject->GetParam( Param => 'ID' );
     if ( !$FieldID ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Need ID",
         );
     }
 
     # get dynamic field data
-    my $DynamicFieldData = $Self->{DynamicFieldObject}->DynamicFieldGet(
+    my $DynamicFieldData = $DynamicFieldObject->DynamicFieldGet(
         ID => $FieldID,
     );
 
     # check for valid dynamic field configuration
     if ( !IsHashRefWithData($DynamicFieldData) ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Could not get data for dynamic field $FieldID",
         );
     }
@@ -350,7 +360,7 @@ sub _ChangeAction {
         }
 
         # get dynamic field list
-        my $DynamicFieldsList = $Self->{DynamicFieldObject}->DynamicFieldList(
+        my $DynamicFieldsList = $DynamicFieldObject->DynamicFieldList(
             Valid      => 0,
             ResultType => 'HASH',
         ) || {};
@@ -403,7 +413,7 @@ sub _ChangeAction {
             MinQueryLength QueryDelay MaxQueryResult
         )
     ) {
-        $GetParam{$ConfigParam} = $Self->{ParamObject}->GetParam( Param => $ConfigParam );
+        $GetParam{$ConfigParam} = $ParamObject->GetParam( Param => $ConfigParam );
     }
 
     # get 'raw' configuration params
@@ -412,7 +422,7 @@ sub _ChangeAction {
             ItemSeparator
         )
     ) {
-        $GetParam{$ConfigParam} = $Self->{ParamObject}->GetParam( Param => $ConfigParam, Raw => 1, );
+        $GetParam{$ConfigParam} = $ParamObject->GetParam( Param => $ConfigParam, Raw => 1, );
     }
 
     # get 'array' configuration params
@@ -421,13 +431,13 @@ sub _ChangeAction {
             ITSMConfigItemClasses DeploymentStates DefaultValues
         )
     ) {
-        my @Data = $Self->{ParamObject}->GetArray( Param => $ConfigParam );
+        my @Data = $ParamObject->GetArray( Param => $ConfigParam );
         $GetParam{$ConfigParam} = \@Data;
     }
 
     # uncorrectable errors
     if ( !$GetParam{ValidID} ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Need ValidID",
         );
     }
@@ -460,7 +470,7 @@ sub _ChangeAction {
     };
 
     # update dynamic field (FieldType and ObjectType cannot be changed; use old values)
-    my $UpdateSuccess = $Self->{DynamicFieldObject}->DynamicFieldUpdate(
+    my $UpdateSuccess = $DynamicFieldObject->DynamicFieldUpdate(
         ID         => $FieldID,
         Name       => $GetParam{Name},
         Label      => $GetParam{Label},
@@ -473,18 +483,25 @@ sub _ChangeAction {
     );
 
     if ( !$UpdateSuccess ) {
-        return $Self->{LayoutObject}->ErrorScreen(
+        return $LayoutObject->ErrorScreen(
             Message => "Could not update the field $GetParam{Name}",
         );
     }
 
-    return $Self->{LayoutObject}->Redirect(
+    return $LayoutObject->Redirect(
         OP => "Action=AdminDynamicField",
     );
 }
 
 sub _ShowScreen {
     my ( $Self, %Param ) = @_;
+
+    my $ParamObject          = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject         = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $DynamicFieldObject   = $Kernel::OM->Get('Kernel::System::DynamicField');
+    my $ValidObject          = $Kernel::OM->Get('Kernel::System::Valid');
+    my $GeneralCatalogObject = $Kernel::OM->Get('Kernel::System::GeneralCatalog');
+    my $ITSMConfigItemObject = $Kernel::OM->Get('Kernel::System::ITSMConfigItem');
 
     $Param{DisplayFieldName} = 'New';
 
@@ -507,11 +524,11 @@ sub _ShowScreen {
     $Param{MaxQueryResult}        = $Param{Config}->{MaxQueryResult}        || 10;
 
     # header
-    my $Output = $Self->{LayoutObject}->Header();
-    $Output   .= $Self->{LayoutObject}->NavigationBar();
+    my $Output = $LayoutObject->Header();
+    $Output   .= $LayoutObject->NavigationBar();
 
     # get all fields
-    my $DynamicFieldList = $Self->{DynamicFieldObject}->DynamicFieldListGet(
+    my $DynamicFieldList = $DynamicFieldObject->DynamicFieldListGet(
         Valid => 0,
     );
 
@@ -536,7 +553,7 @@ sub _ShowScreen {
 
     # show the names of the other fields to ease ordering
     my %OrderNamesList;
-    my $CurrentlyText = $Self->{LayoutObject}->{LanguageObject}->Translate('Currently') . ': ';
+    my $CurrentlyText = $LayoutObject->{LanguageObject}->Translate('Currently') . ': ';
     for my $OrderNumber ( sort @DynamicfieldOrderList ) {
         $OrderNamesList{$OrderNumber} = $OrderNumber;
         if ( $DynamicfieldNamesList{$OrderNumber} && $OrderNumber ne $Param{FieldOrder} ) {
@@ -546,7 +563,7 @@ sub _ShowScreen {
         }
     }
 
-    my $DynamicFieldOrderStrg = $Self->{LayoutObject}->BuildSelection(
+    my $DynamicFieldOrderStrg = $LayoutObject->BuildSelection(
         Data          => \%OrderNamesList,
         Name          => 'FieldOrder',
         SelectedValue => $Param{FieldOrder} || 1,
@@ -556,10 +573,10 @@ sub _ShowScreen {
         Class         => 'Modernize W75pc Validate_Number',
     );
 
-    my %ValidList = $Self->{ValidObject}->ValidList();
+    my %ValidList = $ValidObject->ValidList();
 
     # create the Validity select
-    my $ValidityStrg = $Self->{LayoutObject}->BuildSelection(
+    my $ValidityStrg = $LayoutObject->BuildSelection(
         Data         => \%ValidList,
         Name         => 'ValidID',
         SelectedID   => $Param{ValidID} || 1,
@@ -570,10 +587,10 @@ sub _ShowScreen {
 
     ## Field Configurations
     # ITSMConfigItemClasses - ARRAY
-    my $ClassRef = $Self->{GeneralCatalogObject}->ItemList(
+    my $ClassRef = $GeneralCatalogObject->ItemList(
         Class => 'ITSM::ConfigItem::Class',
     );
-    my $ITSMConfigItemClassesStrg = $Self->{LayoutObject}->BuildSelection(
+    my $ITSMConfigItemClassesStrg = $LayoutObject->BuildSelection(
         Data         => \%{$ClassRef},
         Name         => 'ITSMConfigItemClasses',
         SelectedID   => $Param{ITSMConfigItemClasses},
@@ -584,10 +601,10 @@ sub _ShowScreen {
     );
 
     # DeploymentStates - ARRAY
-    my $DeploymentRef = $Self->{GeneralCatalogObject}->ItemList(
+    my $DeploymentRef = $GeneralCatalogObject->ItemList(
         Class => 'ITSM::ConfigItem::DeploymentState',
     );
-    my $DeploymentStatesStrg = $Self->{LayoutObject}->BuildSelection(
+    my $DeploymentStatesStrg = $LayoutObject->BuildSelection(
         Data         => \%{$DeploymentRef},
         Name         => 'DeploymentStates',
         SelectedID   => $Param{DeploymentStates},
@@ -607,7 +624,7 @@ sub _ShowScreen {
     # nothing to do
 
     # ItemSeparator
-    my $ItemSeparatorStrg = $Self->{LayoutObject}->BuildSelection(
+    my $ItemSeparatorStrg = $LayoutObject->BuildSelection(
         Data => {
             ', ' => 'Comma (,)',
             '; ' => 'Semicolon (;)',
@@ -627,7 +644,7 @@ sub _ShowScreen {
         next if (!$Key);
         $DefaultValuesCount++;
 
-        my $ConfigItem = $Self->{ITSMConfigItemObject}->VersionGet(
+        my $ConfigItem = $ITSMConfigItemObject->VersionGet(
             ConfigItemID => $Key,
             XMLDataGet   => 0,
         );
@@ -638,7 +655,7 @@ sub _ShowScreen {
             $Label =~ s/<CI_$1>/$Replace/g;
         }
 
-        $Self->{LayoutObject}->Block(
+        $LayoutObject->Block(
             Name => 'DefaultValue',
             Data => {
                 DefaultValue => $Key,
@@ -665,14 +682,14 @@ sub _ShowScreen {
 
     # Internal fields can not be deleted and name should not change.
     if ( $Param{InternalField} ) {
-        $Self->{LayoutObject}->Block(
+        $LayoutObject->Block(
             Name => 'InternalField',
             Data => {%Param},
         );
     }
 
     # generate output
-    $Output .= $Self->{LayoutObject}->Output(
+    $Output .= $LayoutObject->Output(
         TemplateFile => 'AdminDynamicFieldITSMConfigItem',
         Data => {
             %Param,
@@ -685,7 +702,7 @@ sub _ShowScreen {
         }
     );
 
-    $Output .= $Self->{LayoutObject}->Footer();
+    $Output .= $LayoutObject->Footer();
 
     return $Output;
 }
@@ -693,25 +710,33 @@ sub _ShowScreen {
 sub _DefaultValueSearch {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject          = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject         = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $DynamicFieldObject   = $Kernel::OM->Get('Kernel::System::DynamicField');
+    my $ValidObject          = $Kernel::OM->Get('Kernel::System::Valid');
+    my $EncodeObject         = $Kernel::OM->Get('Kernel::System::Encode');
+    my $GeneralCatalogObject = $Kernel::OM->Get('Kernel::System::GeneralCatalog');
+    my $ITSMConfigItemObject = $Kernel::OM->Get('Kernel::System::ITSMConfigItem');
+
     # get search
-    my $Search = $Self->{ParamObject}->GetParam( Param => 'Search' ) || '';
+    my $Search = $ParamObject->GetParam( Param => 'Search' ) || '';
     $Search = '*' . $Search . '*';
-    $Self->{EncodeObject}->EncodeInput( \$Search );
+    $EncodeObject->EncodeInput( \$Search );
 
     # get used ITSMConfigItemClasses
-    my @ITSMConfigItemClasses = $Self->{ParamObject}->GetArray( Param => 'ITSMConfigItemClasses' );
+    my @ITSMConfigItemClasses = $ParamObject->GetArray( Param => 'ITSMConfigItemClasses' );
 
     # get used DeploymentStates
-    my @DeploymentStates = $Self->{ParamObject}->GetArray( Param => 'DeploymentStates' );
+    my @DeploymentStates = $ParamObject->GetArray( Param => 'DeploymentStates' );
 
     # get used Constrictions
-    my $Constrictions = $Self->{ParamObject}->GetParam( Param => 'Constrictions' ) || '';
+    my $Constrictions = $ParamObject->GetParam( Param => 'Constrictions' ) || '';
 
     # get display type
-    my $DisplayPattern = uri_unescape($Self->{ParamObject}->GetParam( Param => 'DisplayPattern' )) || '<CI_Name>';
+    my $DisplayPattern = uri_unescape($ParamObject->GetParam( Param => 'DisplayPattern' )) || '<CI_Name>';
 
     # get used entries
-    my @Entries = $Self->{ParamObject}->GetArray( Param => 'DefaultValues' );
+    my @Entries = $ParamObject->GetArray( Param => 'DefaultValues' );
 
     # build search params from constrictions...
     my @SearchParamsWhat;
@@ -741,7 +766,7 @@ sub _DefaultValueSearch {
     }
 
     if ( !scalar(@ITSMConfigItemClasses) ) {
-        my $ClassRef = $Self->{GeneralCatalogObject}->ItemList(
+        my $ClassRef = $GeneralCatalogObject->ItemList(
             Class => 'ITSM::ConfigItem::Class',
         );
         for my $ClassID ( keys ( %{$ClassRef} ) ) {
@@ -751,7 +776,7 @@ sub _DefaultValueSearch {
 
     for my $ClassID (@ITSMConfigItemClasses) {
         # get current definition
-        my $XMLDefinition = $Self->{ITSMConfigItemObject}->DefinitionGet(
+        my $XMLDefinition = $ITSMConfigItemObject->DefinitionGet(
             ClassID => $ClassID,
         );
 
@@ -766,7 +791,7 @@ sub _DefaultValueSearch {
     }
 
     my %ConfigItemIDs;
-    my $ConfigItemIDs = $Self->{ITSMConfigItemObject}->ConfigItemSearchExtended(
+    my $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
         Name         => $Search,
         ClassIDs     => \@ITSMConfigItemClasses,
         DeplStateIDs => \@DeploymentStates,
@@ -777,7 +802,7 @@ sub _DefaultValueSearch {
         $ConfigItemIDs{$ID} = 1;
     }
 
-    $ConfigItemIDs = $Self->{ITSMConfigItemObject}->ConfigItemSearchExtended(
+    $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
         Number       => $Search,
         ClassIDs     => \@ITSMConfigItemClasses,
         DeplStateIDs => \@DeploymentStates,
@@ -794,7 +819,7 @@ sub _DefaultValueSearch {
     for my $Key ( sort keys %ConfigItemIDs ) {
         next CIID if ( grep { /^$Key$/ } @Entries );
 
-        my $ConfigItem = $Self->{ITSMConfigItemObject}->VersionGet(
+        my $ConfigItem = $ITSMConfigItemObject->VersionGet(
             ConfigItemID => $Key,
             XMLDataGet   => 0,
         );
@@ -822,12 +847,12 @@ sub _DefaultValueSearch {
     }
 
     # build JSON output
-    my $JSON = $Self->{LayoutObject}->JSONEncode(
+    my $JSON = $LayoutObject->JSONEncode(
         Data => \@PossibleValues,
     );
 
     # send JSON response
-    return $Self->{LayoutObject}->Attachment(
+    return $LayoutObject->Attachment(
         ContentType => 'application/json; charset=' . $Self->{LayoutObject}->{Charset},
         Content     => $JSON || '',
         Type        => 'inline',

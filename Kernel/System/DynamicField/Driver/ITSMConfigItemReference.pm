@@ -1,6 +1,7 @@
 # --
 # Kernel/System/DynamicField/Driver/ITSMConfigItemReference.pm - Delegate for DynamicField ITSMConfigItemReference backend
 # Copyright (C) 2006-2016 c.a.p.e. IT GmbH, http://www.cape-it.de
+# Maintenance 2018 - Perl-Services.de, http://perl-services.de
 #
 # written/edited by:
 # * Mario(dot)Illinger(at)cape(dash)it(dot)de
@@ -1627,8 +1628,6 @@ sub _ExportXMLSearchDataPrepare {
 =back
 
 =head1 TERMS AND CONDITIONS
-
-This software is part of the OTRS project (L<http://otrs.org/>).
 
 This software comes with ABSOLUTELY NO WARRANTY. For details, see
 the enclosed file COPYING for license information (AGPL). If you

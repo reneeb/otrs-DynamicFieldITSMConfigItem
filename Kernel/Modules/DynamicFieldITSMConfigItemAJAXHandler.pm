@@ -1,6 +1,7 @@
 # --
 # Kernel/Modules/DynamicFieldITSMConfigItemAJAXHandler.pm - a module used to handle ajax requests
 # Copyright (C) 2006-2016 c.a.p.e. IT GmbH, http://www.cape-it.de
+# Maintenance 2018 - Perl-Services.de, http://perl-services.de
 #
 # written/edited by:
 # * Mario(dot)Illinger(at)cape(dash)it(dot)de
@@ -45,34 +46,34 @@ sub Run {
     my ( $Self, %Param ) = @_;
 
     # create needed objects
-    $Self->{LayoutObject}                  = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-    $Self->{CustomerUserObject}            = $Kernel::OM->Get('Kernel::System::CustomerUser');
-    $Self->{DynamicFieldObject}            = $Kernel::OM->Get('Kernel::System::DynamicField');
-    $Self->{ITSMConfigItemReferenceObject} = $Kernel::OM->Get('Kernel::System::DynamicField::Driver::ITSMConfigItemReference');
-    $Self->{EncodeObject}                  = $Kernel::OM->Get('Kernel::System::Encode');
-    $Self->{GeneralCatalogObject}          = $Kernel::OM->Get('Kernel::System::GeneralCatalog');
-    $Self->{ITSMConfigItemObject}          = $Kernel::OM->Get('Kernel::System::ITSMConfigItem');
-    $Self->{LogObject}                     = $Kernel::OM->Get('Kernel::System::Log');
-    $Self->{TicketObject}                  = $Kernel::OM->Get('Kernel::System::Ticket');
-    $Self->{ParamObject}                   = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject                  = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $CustomerUserObject            = $Kernel::OM->Get('Kernel::System::CustomerUser');
+    my $DynamicFieldObject            = $Kernel::OM->Get('Kernel::System::DynamicField');
+    my $ITSMConfigItemReferenceObject = $Kernel::OM->Get('Kernel::System::DynamicField::Driver::ITSMConfigItemReference');
+    my $EncodeObject                  = $Kernel::OM->Get('Kernel::System::Encode');
+    my $GeneralCatalogObject          = $Kernel::OM->Get('Kernel::System::GeneralCatalog');
+    my $ITSMConfigItemObject          = $Kernel::OM->Get('Kernel::System::ITSMConfigItem');
+    my $LogObject                     = $Kernel::OM->Get('Kernel::System::Log');
+    my $TicketObject                  = $Kernel::OM->Get('Kernel::System::Ticket');
+    my $ParamObject                   = $Kernel::OM->Get('Kernel::System::Web::Request');
 
     my $JSON = '';
 
     # get mandatory param
-    my $DynamicFieldID = $Self->{ParamObject}->GetParam( Param => 'DynamicFieldID' );
+    my $DynamicFieldID = $ParamObject->GetParam( Param => 'DynamicFieldID' );
 
     if ($DynamicFieldID) {
 
         # get needed params
-        my $Subaction   = $Self->{ParamObject}->GetParam( Param => 'Subaction' ) || '';
-        my $FieldPrefix = $Self->{ParamObject}->GetParam( Param => 'FieldPrefix' ) || '';
+        my $Subaction   = $ParamObject->GetParam( Param => 'Subaction' ) || '';
+        my $FieldPrefix = $ParamObject->GetParam( Param => 'FieldPrefix' ) || '';
 
-        my $DynamicFieldConfig = $Self->{DynamicFieldObject}->DynamicFieldGet(
+        my $DynamicFieldConfig = $DynamicFieldObject->DynamicFieldGet(
             ID => $DynamicFieldID,
         );
 
         if ( $DynamicFieldConfig->{FieldType} ne 'ITSMConfigItemReference' ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message => "DynamicFieldITSMConfigItemAJAXHandler: DynamicField doesn't refer to type ITSMConfigItem.",
             );
@@ -80,18 +81,18 @@ sub Run {
         }
 
         # get used entries
-        my @Entries = $Self->{ParamObject}->GetArray( Param => $FieldPrefix . 'DynamicField_' . $DynamicFieldConfig->{Name} );
+        my @Entries = $ParamObject->GetArray( Param => $FieldPrefix . 'DynamicField_' . $DynamicFieldConfig->{Name} );
 
         # get attributes from web request
-        my @ParamNames = $Self->{ParamObject}->GetParamNames();
+        my @ParamNames = $ParamObject->GetParamNames();
         my %WebParams  = map { $_ => 1 } @ParamNames;
 
         #handle subaction Search
         if ($Subaction eq 'Search') {
-            my $Search = $Self->{ParamObject}->GetParam( Param => 'Search' ) || '';
+            my $Search = $ParamObject->GetParam( Param => 'Search' ) || '';
 
             # encode the input
-            $Self->{EncodeObject}->EncodeInput( \$Search );
+            $EncodeObject->EncodeInput( \$Search );
 
             my @PossibleValues;
 
@@ -99,19 +100,19 @@ sub Run {
                 defined $Search
                 && $Search ne ''
             ) {
-                my $ConfigOnly     = $Self->{ParamObject}->GetParam( Param => 'ConfigOnly' ) || '';
+                my $ConfigOnly     = $ParamObject->GetParam( Param => 'ConfigOnly' ) || '';
                 my $TicketID       = '';
                 my $CustomerUserID = '';
                 if (!$ConfigOnly) {
-                    $TicketID       = $Self->{ParamObject}->GetParam( Param => 'TicketID' )   || '';
-                    $CustomerUserID = $Self->{ParamObject}->GetParam( Param => 'CustomerUserID' )
-                                    || uri_unescape($Self->{ParamObject}->GetParam( Param => 'SelectedCustomerUser' ))
+                    $TicketID       = $ParamObject->GetParam( Param => 'TicketID' )   || '';
+                    $CustomerUserID = $ParamObject->GetParam( Param => 'CustomerUserID' )
+                                    || uri_unescape($ParamObject->GetParam( Param => 'SelectedCustomerUser' ))
                                     || '';
                 }
 
                 my %TicketData;
                 if ($TicketID =~ /^\d+$/) {
-                    %TicketData = $Self->{TicketObject}->TicketGet(
+                    %TicketData = $TicketObject->TicketGet(
                         TicketID      => $TicketID,
                         DynamicFields => 1,
                         Extended      => 1,
@@ -123,7 +124,7 @@ sub Run {
 
                 my %CustomerUserData;
                 if ( $CustomerUserID ) {
-                    %CustomerUserData = $Self->{CustomerUserObject}->CustomerUserDataGet(
+                    %CustomerUserData = $CustomerUserObject->CustomerUserDataGet(
                         User => $CustomerUserID,
                     );
                 }
@@ -180,7 +181,7 @@ sub Run {
                             }
                             # check if attribute is in web params
                             if ( $WebParams{ $ConstrictionRule[2] } ) {
-                                $Constrictions{$ConstrictionRule[0]} = $Self->{ParamObject}->GetParam( Param => $ConstrictionRule[2] ) || '';
+                                $Constrictions{$ConstrictionRule[0]} = $ParamObject->GetParam( Param => $ConstrictionRule[2] ) || '';
                             }
                             # mark check success if value is not empty
                             if ( $Constrictions{$ConstrictionRule[0]} ) {
@@ -215,7 +216,7 @@ sub Run {
                         @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
                     }
                     if ( !scalar(@ITSMConfigItemClasses) ) {
-                        my $ClassRef = $Self->{GeneralCatalogObject}->ItemList(
+                        my $ClassRef = $GeneralCatalogObject->ItemList(
                             Class => 'ITSM::ConfigItem::Class',
                         );
                         for my $ClassID ( keys ( %{$ClassRef} ) ) {
@@ -225,7 +226,7 @@ sub Run {
 
                     for my $ClassID ( @ITSMConfigItemClasses ) {
                         # get current definition
-                        my $XMLDefinition = $Self->{ITSMConfigItemObject}->DefinitionGet(
+                        my $XMLDefinition = $ITSMConfigItemObject->DefinitionGet(
                             ClassID => $ClassID,
                         );
 
@@ -246,7 +247,7 @@ sub Run {
                     }
 
                     my %ConfigItemIDs;
-                    my $ConfigItemIDs = $Self->{ITSMConfigItemObject}->ConfigItemSearchExtended(
+                    my $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
                         Name         => $Search,
                         ClassIDs     => \@ITSMConfigItemClasses,
                         DeplStateIDs => $DynamicFieldConfig->{Config}->{DeploymentStates},
@@ -257,7 +258,7 @@ sub Run {
                         $ConfigItemIDs{$ID} = 1;
                     }
 
-                    $ConfigItemIDs = $Self->{ITSMConfigItemObject}->ConfigItemSearchExtended(
+                    $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
                         Number       => $Search,
                         ClassIDs     => \@ITSMConfigItemClasses,
                         DeplStateIDs => $DynamicFieldConfig->{Config}->{DeploymentStates},
@@ -273,7 +274,7 @@ sub Run {
                     for my $Key ( sort ( keys ( %ConfigItemIDs ) ) ) {
                         next CIID if ( grep { /^$Key$/ } @Entries  );
 
-                        my $ConfigItem = $Self->{ITSMConfigItemObject}->VersionGet(
+                        my $ConfigItem = $ITSMConfigItemObject->VersionGet(
                             ConfigItemID => $Key,
                             XMLDataGet   => 0,
                         );
@@ -298,7 +299,7 @@ sub Run {
             }
 
             # build JSON output
-            $JSON = $Self->{LayoutObject}->JSONEncode(
+            $JSON = $LayoutObject->JSONEncode(
                 Data => \@PossibleValues,
             );
         }
@@ -307,14 +308,14 @@ sub Run {
         elsif($Subaction eq 'PossibleValueCheck') {
             my @PossibleValues;
 
-            my $TicketID       = $Self->{ParamObject}->GetParam( Param => 'TicketID' ) || '';
-            my $CustomerUserID = $Self->{ParamObject}->GetParam( Param => 'CustomerUserID' )
-                                || uri_unescape($Self->{ParamObject}->GetParam( Param => 'SelectedCustomerUser' ))
+            my $TicketID       = $ParamObject->GetParam( Param => 'TicketID' ) || '';
+            my $CustomerUserID = $ParamObject->GetParam( Param => 'CustomerUserID' )
+                                || uri_unescape($ParamObject->GetParam( Param => 'SelectedCustomerUser' ))
                                 || '';
 
             my %TicketData;
             if ($TicketID =~ /^\d+$/) {
-                %TicketData = $Self->{TicketObject}->TicketGet(
+                %TicketData = $TicketObject->TicketGet(
                     TicketID      => $TicketID,
                     DynamicFields => 1,
                     Extended      => 1,
@@ -326,7 +327,7 @@ sub Run {
 
             my %CustomerUserData;
             if ( $CustomerUserID ) {
-                %CustomerUserData = $Self->{CustomerUserObject}->CustomerUserDataGet(
+                %CustomerUserData = $CustomerUserObject->CustomerUserDataGet(
                     User => $CustomerUserID,
                 );
             }
@@ -380,7 +381,7 @@ sub Run {
                         }
                         # check if attribute is in web params
                         if ( $WebParams{ $ConstrictionRule[2] } ) {
-                            $Constrictions{$ConstrictionRule[0]} = $Self->{ParamObject}->GetParam( Param => $ConstrictionRule[2] ) || '';
+                            $Constrictions{$ConstrictionRule[0]} = $ParamObject->GetParam( Param => $ConstrictionRule[2] ) || '';
                         }
                         # mark check success if value is not empty
                         if ( $Constrictions{$ConstrictionRule[0]} ) {
@@ -415,7 +416,7 @@ sub Run {
                     @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
                 }
                 if ( !scalar(@ITSMConfigItemClasses) ) {
-                    my $ClassRef = $Self->{GeneralCatalogObject}->ItemList(
+                    my $ClassRef = $GeneralCatalogObject->ItemList(
                         Class => 'ITSM::ConfigItem::Class',
                     );
                     for my $ClassID ( keys ( %{$ClassRef} ) ) {
@@ -425,7 +426,7 @@ sub Run {
 
                 for my $ClassID ( @ITSMConfigItemClasses ) {
                     # get current definition
-                    my $XMLDefinition = $Self->{ITSMConfigItemObject}->DefinitionGet(
+                    my $XMLDefinition = $ITSMConfigItemObject->DefinitionGet(
                         ClassID => $ClassID,
                     );
 
@@ -439,7 +440,7 @@ sub Run {
                     );
                 }
 
-                my $ConfigItemIDs = $Self->{ITSMConfigItemObject}->ConfigItemSearchExtended(
+                my $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
                     Name         => '*',
                     ClassIDs     => \@ITSMConfigItemClasses,
                     DeplStateIDs => $DynamicFieldConfig->{Config}->{DeploymentStates},
@@ -456,7 +457,7 @@ sub Run {
             }
 
             # build JSON output
-            $JSON = $Self->{LayoutObject}->JSONEncode(
+            $JSON = $LayoutObject->JSONEncode(
                 Data => \@PossibleValues,
             );
         }
@@ -464,9 +465,9 @@ sub Run {
         # handle subaction AddValue
         elsif($Subaction eq 'AddValue') {
             my %Data;
-            my $Key = $Self->{ParamObject}->GetParam( Param => 'Key' )  || '';
+            my $Key = $ParamObject->GetParam( Param => 'Key' )  || '';
             if ( !grep { /^$Key$/ } @Entries ) {
-                my $ConfigItem = $Self->{ITSMConfigItemObject}->VersionGet(
+                my $ConfigItem = $ITSMConfigItemObject->VersionGet(
                     ConfigItemID => $Key,
                     XMLDataGet   => 0,
                 );
@@ -484,7 +485,7 @@ sub Run {
                 $Data{Title} = $Title;
 
                 # build JSON output
-                $JSON = $Self->{LayoutObject}->JSONEncode(
+                $JSON = $LayoutObject->JSONEncode(
                     Data => \%Data,
                 );
             }
@@ -493,8 +494,8 @@ sub Run {
     }
 
     # send JSON response
-    return $Self->{LayoutObject}->Attachment(
-        ContentType => 'application/json; charset=' . $Self->{LayoutObject}->{Charset},
+    return $LayoutObject->Attachment(
+        ContentType => 'application/json; charset=' . $LayoutObject->{Charset},
         Content     => $JSON || '',
         Type        => 'inline',
         NoCache     => 1,
