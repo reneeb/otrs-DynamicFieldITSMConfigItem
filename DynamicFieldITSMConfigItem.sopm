@@ -11,7 +11,7 @@
     <Description Lang="en">DynamicField backend to provide access to OTRS CMDB</Description>
     <License>GNU GENERAL PUBLIC LICENSE Version 2, June 1991</License>
     <Filelist>
-        <File Permission="644" Location="Kernel/Config/Files/DynamicFieldITSMConfigItem.xml" />
+        <File Permission="644" Location="Kernel/Config/Files/XML/DynamicFieldITSMConfigItem.xml" />
         <File Permission="644" Location="Kernel/Language/de_DynamicFieldITSMConfigItem.pm" />
         <File Permission="644" Location="Kernel/Modules/AdminDynamicFieldITSMConfigItem.pm" />
         <File Permission="644" Location="Kernel/Modules/DynamicFieldITSMConfigItemAJAXHandler.pm" />
