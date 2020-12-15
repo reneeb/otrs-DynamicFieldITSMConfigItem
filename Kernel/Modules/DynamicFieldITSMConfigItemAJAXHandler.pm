@@ -209,9 +209,11 @@ sub Run {
 
                 if ($ConstrictionsCheck) {
 
+					my @SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
                     my @ITSMConfigItemClasses;
                     if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
-                        && IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
+                       # && IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
+					   && IsArrayRefWithData(@SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
                     ) {
                         @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
                     }
@@ -409,9 +411,12 @@ sub Run {
 
             if ($ConstrictionsCheck) {
 
-                my @ITSMConfigItemClasses;
+				my @SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
+				my @ITSMConfigItemClasses;
+				
                 if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
-                    && IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
+                    #&& IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
+					&& IsArrayRefWithData(@SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
                 ) {
                     @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
                 }
