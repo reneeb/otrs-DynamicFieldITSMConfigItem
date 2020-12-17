@@ -2,7 +2,7 @@
 <otrs_package version="1.0">
     <!-- GENERATED WITH OTRS::OPM::Maker::Command::sopm (1.4) -->
     <Name>DynamicFieldITSMConfigItem</Name>
-    <Version>6.0.1</Version>
+    <Version>6.0.2</Version>
     <Framework>6.0.x</Framework>
     <PackageRequired Version="6.0.1">ITSMConfigurationManagement</PackageRequired>
     <Vendor>Perl-Services.de</Vendor>
@@ -10,6 +10,7 @@
     <Description Lang="de">DynamicField-Backend zur Bereitstellung des Zugangs zur OTRS-CMDB</Description>
     <Description Lang="en">DynamicField backend to provide access to OTRS CMDB</Description>
     <License>GNU GENERAL PUBLIC LICENSE Version 2, June 1991</License>
+    <ChangeLog Version="6.0.2" Date="2020-12-16 18:45:21">Fix issue https://github.com/reneeb/otrs-DynamicFieldITSMConfigItem/issues/3.</ChangeLog>
     <Filelist>
         <File Permission="644" Location="Kernel/Config/Files/XML/DynamicFieldITSMConfigItem.xml" />
         <File Permission="644" Location="Kernel/Language/de_DynamicFieldITSMConfigItem.pm" />
@@ -40,4 +41,7 @@ You are about to install the OTRS module DynamicFieldITSMConfigItem.<br />
 Required OTRS packages:<br />
 ITSMConfigurationManagement 6.0.1 or higher
     ]]></IntroInstall>
+	<IntroUpgrade Type="post" Lang="en" Title="Upgrade Information"><![CDATA[
+You are about to upgrade this package. Check changelog.
+    ]]></IntroUpgrade>
 </otrs_package>
