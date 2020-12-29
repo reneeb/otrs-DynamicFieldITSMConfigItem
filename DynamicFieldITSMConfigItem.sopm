@@ -2,7 +2,7 @@
 <otrs_package version="1.0">
     <!-- GENERATED WITH OTRS::OPM::Maker::Command::sopm (1.4) -->
     <Name>DynamicFieldITSMConfigItem</Name>
-    <Version>6.0.2</Version>
+    <Version>6.0.3</Version>
     <Framework>6.0.x</Framework>
     <PackageRequired Version="6.0.1">ITSMConfigurationManagement</PackageRequired>
     <Vendor>Perl-Services.de</Vendor>
@@ -21,6 +21,7 @@
         <File Permission="644" Location="doc/CHANGES_DynamicFieldITSMConfigItem.md" />
         <File Permission="644" Location="doc/DynamicFieldITSMConfigItem.json" />
         <File Permission="644" Location="doc/en/DynamicFieldITSMConfigItem.pdf" />
+        <File Permission="644" Location="doc/en/DynamicFieldITSMConfigItem.pod" />
         <File Permission="644" Location="var/packagesetup/DynamicFieldITSMConfigItem.pm" />
     </Filelist>
     <CodeInstall Type="post"><![CDATA[
