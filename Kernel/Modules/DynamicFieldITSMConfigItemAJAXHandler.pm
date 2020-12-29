@@ -209,13 +209,12 @@ sub Run {
 
                 if ($ConstrictionsCheck) {
 
-					my @SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
+                    my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
                     my @ITSMConfigItemClasses;
                     if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
-                       # && IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
-					   && IsArrayRefWithData(@SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
+                       && IsArrayRefWithData($SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
                     ) {
-                        @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
+                        @ITSMConfigItemClasses = @{$SelectedClasses};
                     }
                     if ( !scalar(@ITSMConfigItemClasses) ) {
                         my $ClassRef = $GeneralCatalogObject->ItemList(
@@ -411,14 +410,13 @@ sub Run {
 
             if ($ConstrictionsCheck) {
 
-				my @SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
-				my @ITSMConfigItemClasses;
-				
+                my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
+                my @ITSMConfigItemClasses;
+
                 if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
-                    #&& IsArrayRefWithData(@{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}})
-					&& IsArrayRefWithData(@SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
+                    && IsArrayRefWithData($SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
                 ) {
-                    @ITSMConfigItemClasses = @{$DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}};
+                    @ITSMConfigItemClasses = @{$SelectedClasses};
                 }
                 if ( !scalar(@ITSMConfigItemClasses) ) {
                     my $ClassRef = $GeneralCatalogObject->ItemList(
