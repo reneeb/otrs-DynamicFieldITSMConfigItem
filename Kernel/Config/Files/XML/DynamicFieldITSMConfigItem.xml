@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<otrs_config version="2.0" init="Framework">
-    <CVS>$Id: DynamicFieldITSMConfigItem.xml,v 1.9 2015/12/31 19:50:20 millinger Exp $</CVS>
+<otobo_config version="2.0" init="Framework">
     <Setting Name="DynamicFields::Driver###ITSMConfigItemReference" Required="0" Valid="1">
         <Description Translatable="1">DynamicField backend registration.</Description>
         <Navigation>Core::DynamicFields::DriverRegistration</Navigation>
@@ -143,4 +142,4 @@
         </Value>
     </Setting>
 
-</otrs_config>
+</otobo_config>
