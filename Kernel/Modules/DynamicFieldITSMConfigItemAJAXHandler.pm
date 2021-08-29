@@ -173,16 +173,20 @@ sub Run {
                                 || defined( $TicketData{ $ConstrictionRule[2] } )
                             )
                         ) {
+
                             # get value from ticket data
                             $Constrictions{$ConstrictionRule[0]} = $TicketData{ $ConstrictionRule[2] };
+
                             # use only first entry if array is given
                             if ( ref($Constrictions{$ConstrictionRule[0]}) eq 'ARRAY' ) {
                                 $Constrictions{$ConstrictionRule[0]} = $Constrictions{$ConstrictionRule[0]}->[0];
                             }
+
                             # check if attribute is in web params
                             if ( $WebParams{ $ConstrictionRule[2] } ) {
                                 $Constrictions{$ConstrictionRule[0]} = $ParamObject->GetParam( Param => $ConstrictionRule[2] ) || '';
                             }
+
                             # mark check success if value is not empty
                             if ( $Constrictions{$ConstrictionRule[0]} ) {
                                 $ConstrictionCheck = 1;
@@ -209,23 +213,28 @@ sub Run {
 
                 if ($ConstrictionsCheck) {
 
-                    my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
+                    #fix issue 'Does not work with Class filter' by mo-azfar
+                    my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; 
                     my @ITSMConfigItemClasses;
+
                     if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
                        && IsArrayRefWithData($SelectedClasses) #fix issue 'Does not work with Class filter' by mo-azfar
                     ) {
                         @ITSMConfigItemClasses = @{$SelectedClasses};
                     }
+
                     if ( !scalar(@ITSMConfigItemClasses) ) {
                         my $ClassRef = $GeneralCatalogObject->ItemList(
                             Class => 'ITSM::ConfigItem::Class',
                         );
+
                         for my $ClassID ( keys ( %{$ClassRef} ) ) {
                             push ( @ITSMConfigItemClasses, $ClassID );
                         }
                     }
 
                     for my $ClassID ( @ITSMConfigItemClasses ) {
+
                         # get current definition
                         my $XMLDefinition = $ITSMConfigItemObject->DefinitionGet(
                             ClassID => $ClassID,
@@ -250,17 +259,6 @@ sub Run {
                     my %ConfigItemIDs;
                     my $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
                         Name         => $Search,
-                        ClassIDs     => \@ITSMConfigItemClasses,
-                        DeplStateIDs => $DynamicFieldConfig->{Config}->{DeploymentStates},
-                        What         => \@SearchParamsWhat,
-                    );
-
-                    for my $ID ( @{$ConfigItemIDs} ) {
-                        $ConfigItemIDs{$ID} = 1;
-                    }
-
-                    $ConfigItemIDs = $ITSMConfigItemObject->ConfigItemSearchExtended(
-                        Number       => $Search,
                         ClassIDs     => \@ITSMConfigItemClasses,
                         DeplStateIDs => $DynamicFieldConfig->{Config}->{DeploymentStates},
                         What         => \@SearchParamsWhat,
@@ -342,12 +340,15 @@ sub Run {
             # prepare constrictions
             my %Constrictions = ();
             my $ConstrictionsCheck = 1;
+
             if ( $Constrictions ) {
                 my @Constrictions = split(/[\n\r]+/, $Constrictions);
+
                 CONSTRICTION:
                 for my $Constriction ( @Constrictions ) {
                     my @ConstrictionRule = split(/::/, $Constriction);
                     my $ConstrictionCheck = 1;
+
                     # check for valid constriction
                     next CONSTRICTION if (
                         scalar(@ConstrictionRule) != 4
@@ -376,18 +377,22 @@ sub Run {
                     ) {
                         # get value from ticket data
                         $Constrictions{$ConstrictionRule[0]} = $TicketData{ $ConstrictionRule[2] };
+
                         # use only first entry if array is given
                         if ( ref($Constrictions{$ConstrictionRule[0]}) eq 'ARRAY' ) {
                             $Constrictions{$ConstrictionRule[0]} = $Constrictions{$ConstrictionRule[0]}->[0];
                         }
+
                         # check if attribute is in web params
                         if ( $WebParams{ $ConstrictionRule[2] } ) {
                             $Constrictions{$ConstrictionRule[0]} = $ParamObject->GetParam( Param => $ConstrictionRule[2] ) || '';
                         }
+
                         # mark check success if value is not empty
                         if ( $Constrictions{$ConstrictionRule[0]} ) {
                             $ConstrictionCheck = 1;
                         }
+
                         # set constriction value undef if empty
                         else {
                             delete( $Constrictions{$ConstrictionRule[0]} );
@@ -410,7 +415,8 @@ sub Run {
 
             if ($ConstrictionsCheck) {
 
-                my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; #fix issue 'Does not work with Class filter' by mo-azfar
+                #fix issue 'Does not work with Class filter' by mo-azfar
+                my $SelectedClasses = $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}; 
                 my @ITSMConfigItemClasses;
 
                 if( defined $DynamicFieldConfig->{Config}->{ITSMConfigItemClasses}
@@ -418,16 +424,19 @@ sub Run {
                 ) {
                     @ITSMConfigItemClasses = @{$SelectedClasses};
                 }
+
                 if ( !scalar(@ITSMConfigItemClasses) ) {
                     my $ClassRef = $GeneralCatalogObject->ItemList(
                         Class => 'ITSM::ConfigItem::Class',
                     );
+
                     for my $ClassID ( keys ( %{$ClassRef} ) ) {
                         push ( @ITSMConfigItemClasses, $ClassID );
                     }
                 }
 
                 for my $ClassID ( @ITSMConfigItemClasses ) {
+
                     # get current definition
                     my $XMLDefinition = $ITSMConfigItemObject->DefinitionGet(
                         ClassID => $ClassID,
