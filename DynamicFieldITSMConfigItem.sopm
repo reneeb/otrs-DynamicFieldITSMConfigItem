@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <otobo_package version="1.0">
-    <!-- GENERATED WITH OTRS::OPM::Maker::Command::sopm (1.44) -->
+    <!-- GENERATED WITH OPM::Maker::Command::sopm (1.1.0) -->
     <Name>DynamicFieldITSMConfigItem</Name>
-    <Version>10.0.1</Version>
+    <Version>10.0.2</Version>
     <Framework>10.0.x</Framework>
+    <Framework>10.1.x</Framework>
     <PackageRequired Version="10.0.1">ITSMConfigurationManagement</PackageRequired>
     <Vendor>Perl-Services.de</Vendor>
     <URL>http://www.perl-services.de</URL>
